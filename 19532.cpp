@@ -1,6 +1,8 @@
 #include <iostream>
 using namespace std;
 
+// https://www.acmicpc.net/problem/19532
+
 int main()
 {
 	int a1, a2;
@@ -12,6 +14,10 @@ int main()
 
 	int x, y;
 
+	bool breaker;
+	
+	breaker = false;
+
 	for (int i = -999; i < 1000; i++)
 	{
 		for (int j = -999; j < 1000; j++)
@@ -20,7 +26,17 @@ int main()
 			{
 				x = i;
 				y = j;
+
+				breaker = true;
 			}
+
+			if (breaker == true) {
+				break;
+			}
+		}
+
+		if (breaker == true) {
+			break;
 		}
 	}
 
