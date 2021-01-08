@@ -3,7 +3,7 @@
 using namespace std;
 
 // https://www.acmicpc.net/problem/14889
-
+  
 int N;
 int S[21][21];
 

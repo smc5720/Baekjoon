@@ -6,7 +6,7 @@ using namespace std;
 
 bool map[14][14];
 int N, result;
-
+  
 bool isVaild(int i, int cnt)
 {
 	int x, y;

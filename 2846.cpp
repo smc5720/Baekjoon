@@ -3,7 +3,7 @@
 using namespace std;
 
 // https://www.acmicpc.net/problem/2846
-
+  
 int N;
 int road[1000];
 int maxHeight;

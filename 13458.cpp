@@ -8,7 +8,7 @@ int N;
 int A[1000000];
 int B, C;
 long long sum;
-
+  
 int main(void)
 {
 	cin.tie(NULL);
