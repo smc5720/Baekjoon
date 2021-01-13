@@ -1,120 +1,103 @@
 #include <iostream>
 #include <math.h>
+#include <algorithm>
+#include <vector>
+#include <string>
+
 using namespace std;
 
 // https://www.acmicpc.net/problem/14888
 
-int A[101];
 int N;
+int numArray[11];
 int plusOp, minusOp, multiOp, divOp;
-int maxSum, minSum;
-int sum;
+int maxVal, minVal;
 
-void operation(int idx)
+void DFS(int depth, int sum, int idx)
 {
-	if (idx == N)
+	if (depth == 0)
 	{
-		if (maxSum == 99 && minSum == 99)
+		if (sum < minVal)
 		{
-			maxSum = sum;
-			minSum = sum;
+			minVal = sum;
 		}
 
-		else
+		if (sum > maxVal)
 		{
-			if (maxSum < sum)
-			{
-				maxSum = sum;
-			}
-
-			if (minSum > sum)
-			{
-				minSum = sum;
-			}
+			maxVal = sum;
 		}
 
 		return;
 	}
 
-	if (plusOp > 0)
+	else
 	{
-		int k;
-		k = sum;
+		if (plusOp > 0)
+		{
+			int k;
+			k = sum;
+			plusOp -= 1;
+			sum += numArray[idx];
+			DFS(depth - 1, sum, idx + 1);
+			plusOp += 1;
+			sum = k;
+		}
 
-		sum += A[idx];
-		plusOp -= 1;
+		if (minusOp > 0)
+		{
+			int k;
+			k = sum;
+			minusOp -= 1;
+			sum -= numArray[idx];
+			DFS(depth - 1, sum, idx + 1);
+			minusOp += 1;
+			sum = k;
+		}
 
-		operation(idx + 1);
+		if (multiOp > 0)
+		{
+			int k;
+			k = sum;
+			multiOp -= 1;
+			sum *= numArray[idx];
+			DFS(depth - 1, sum, idx + 1);
+			multiOp += 1;
+			sum = k;
+		}
 
-		sum = k;
-		plusOp += 1;
-	}
-
-	if (minusOp > 0)
-	{
-		int k;
-		k = sum;
-
-		sum -= A[idx];
-		minusOp -= 1;
-
-		operation(idx + 1);
-
-		sum = k;
-		minusOp += 1;
-	}
-
-	if (multiOp > 0)
-	{
-		int k;
-		k= sum;
-
-		sum *= A[idx];
-		multiOp -= 1;
-
-		operation(idx + 1);
-
-		sum = k;
-		multiOp += 1;
-	}
-
-	if (divOp > 0)
-	{
-		int k;
-		k = sum;
-
-		sum /= A[idx];
-		divOp -= 1;
-
-		operation(idx + 1);
-
-		sum = k;
-		divOp += 1;
+		if (divOp > 0)
+		{
+			int k;
+			k = sum;
+			divOp -= 1;
+			sum /= numArray[idx];
+			DFS(depth - 1, sum, idx + 1);
+			divOp += 1;
+			sum = k;
+		}
 	}
 }
 
-int main(void)
+int main()
 {
 	cin.tie(NULL);
 	ios::sync_with_stdio(false);
 
-	cin >> N;
+	minVal = 1000000000;
+	maxVal = -1000000000;
 
-	maxSum = 99;
-	minSum = 99;
+	cin >> N;
 
 	for (int i = 0; i < N; i++)
 	{
-		cin >> A[i];
+		cin >> numArray[i];
 	}
-
-	sum = A[0];
 
 	cin >> plusOp >> minusOp >> multiOp >> divOp;
 
-	operation(1);
+	DFS(N - 1, numArray[0], 1);
 
-	cout << maxSum << "\n" << minSum << "\n";
+	cout << maxVal << " " << minVal << "\n";
 
 	return 0;
 }
