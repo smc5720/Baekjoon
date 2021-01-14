@@ -4,7 +4,7 @@
 #include <vector>
 #include <string>
 
-using namespace std;
+using namespace std;  
 
 // https://www.acmicpc.net/problem/14888
 

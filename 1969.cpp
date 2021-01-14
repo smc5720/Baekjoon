@@ -17,7 +17,7 @@ char endDNA[50];
 int main()
 {
 	cin.tie(NULL);
-	ios::sync_with_stdio(false);
+	ios::sync_with_stdio(false);  
 
 	cin >> N >> M;
 
