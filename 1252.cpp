@@ -11,7 +11,7 @@ using namespace std;
 string A, B;
 int bigSize, smallSize;
 bool aIsBig, isSame;
-vector<int> result;
+vector<int> result;  
 
 int main(void)
 {
