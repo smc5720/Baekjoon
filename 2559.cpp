@@ -62,7 +62,7 @@ int main()
 
 	while (right <= N)
 	{
-		num = num - arr[left-1] + arr[right];
+		num = num - arr[left - 1] + arr[right];
 
 		if (maxVal < num)
 		{
