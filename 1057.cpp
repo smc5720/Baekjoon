@@ -10,7 +10,7 @@ using namespace std;
 
 int N;
 int A, B;
-
+ 
 int main()
 {
 	cin.tie(NULL);
