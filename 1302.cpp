@@ -33,7 +33,7 @@ int main()
 
 		else
 		{
-			pair <string, bool> p;
+			pair <string, int> p;
 			p.first = t;
 			p.second = 1;
 
