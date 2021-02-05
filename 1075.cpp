@@ -12,7 +12,7 @@ using namespace std;
 // https://www.acmicpc.net/problem/1075
 
 int N, F;
-
+ 
 int main()
 {
 	cin.tie(NULL);
