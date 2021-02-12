@@ -22,7 +22,7 @@ int main()
 			cin >> map[i][j];
 		}
 	}
-
+ 
 	int x, y;
 	x = 0;
 	y = 0;
