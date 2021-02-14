@@ -7,7 +7,7 @@
 using namespace std;  
 
 // https://www.acmicpc.net/problem/1182
-
+ 
 int N, S;
 int numArray[20];
 int result;
