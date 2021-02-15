@@ -23,7 +23,7 @@ void DFS(int cnt)
 
 		cout << "\n";
 
-		return;
+		return; 
 	}
 
 	for (int i = 1; i <= N; i++)
