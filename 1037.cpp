@@ -14,7 +14,7 @@ using namespace std;
 
 int N;
 int arr[51];
-
+ 
 int main()
 {
 	cin.tie(NULL);
