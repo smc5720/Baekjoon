@@ -11,7 +11,7 @@
 
 using namespace std;
 
-// https://www.acmicpc.net/problem/1351
+// https://www.acmicpc.net/problem/1351 
 
 long long N, P, Q;
 map <long long, long long> m;
