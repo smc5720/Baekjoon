@@ -21,7 +21,7 @@ int main()
 {
 	cin.tie(NULL);
 	ios::sync_with_stdio(false);
-
+ 
 	cin >> n;
 
 	dp[0] = 1;
