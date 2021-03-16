@@ -13,7 +13,7 @@ using namespace std;
 // -1: 장외
 //  0: 아무 것도 없음
 //  1: 왕
-//  2: 돌
+//  2: 돌 
 int board[10][10];
 int N;
 
