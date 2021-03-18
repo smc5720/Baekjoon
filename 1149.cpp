@@ -10,7 +10,7 @@ using namespace std;
 
 int N;
 int cost[1001][3];
-int house[1001][3];
+int house[1001][3]; 
 
 int main()
 { 
