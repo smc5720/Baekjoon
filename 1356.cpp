@@ -10,7 +10,7 @@
 using namespace std;
 
 // https://www.acmicpc.net/problem/1356
-
+ 
 int N;
 int sizeNum;
 int arr[10];
