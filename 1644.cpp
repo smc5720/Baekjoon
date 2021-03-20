@@ -17,7 +17,7 @@ bool pnum[4000001];
 int leftPt, rightPt;
 int arr[4000001];
 
-int main()
+int main() 
 {
 	cin.tie(NULL);
 	ios::sync_with_stdio(false);
