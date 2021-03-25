@@ -14,7 +14,7 @@ using namespace std;
 
 #define DIV 15746
 
-int n;
+int n; 
 long long dp[1000001];
 
 int main()
