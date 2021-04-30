@@ -8,7 +8,7 @@ int main()
 {
 	int times;
 
-	cin >> times;
+	cin >> times; 
 
 	for (int i = 0; i < times; i++)
 	{
