@@ -2,7 +2,7 @@ import java.io.*;
 import java.util.*;
 
 public class Main {
-	public static Node[] node1;
+	public static Node[] node1; 
 	public static Node[] node2;
 	public static ArrayList<Integer> result;
 
