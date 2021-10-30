@@ -4,7 +4,7 @@ import java.util.*;
 public class Main {
 	public static Node[] node1;
 	public static Node[] node2;
-	public static ArrayList<Integer> result;
+	public static ArrayList<Integer> result; 
 
 	public static class Node implements Comparable<Node> {
 		int v;
