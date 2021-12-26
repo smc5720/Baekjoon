@@ -5,7 +5,7 @@ public class Main {
 	static BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
 	static BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(System.out));
 	static StringTokenizer st;
-	static int N, M, W; 
+	static int N, M, W;
 
 	public static class Road {
 		int start, end, time;
