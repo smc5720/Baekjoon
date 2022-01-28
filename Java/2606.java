@@ -1,80 +1,69 @@
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.OutputStreamWriter;
-import java.lang.reflect.Array;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.LinkedList;
-import java.util.Queue;
-import java.util.StringTokenizer;
+import java.io.*;
+import java.util.*;
 
 public class Main {
-	static BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
-	static BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(System.out));
-	static int result = 0;
+	public static class Computer {
+		int num;
+		boolean visited;
+		ArrayList<Computer> friends;
 
-	public static class Node {
-		private ArrayList<Integer> link = new ArrayList<Integer>();
-		private boolean visited = false;
-
-		public Integer[] getLink() {
-			return link.toArray(new Integer[link.size()]);
-		}
-
-		public void addLink(int n) {
-			this.link.add(n);
-		}
-
-		public boolean isVisited() {
-			return visited;
-		}
-
-		public void visit() {
-			this.visited = true;
+		public Computer(int num) {
+			this.num = num;
+			visited = false;
+			friends = new ArrayList<Computer>();
 		}
 	}
 
 	public static void main(String[] args) throws IOException {
-		int N = Integer.parseInt(br.readLine());
-		int T = Integer.parseInt(br.readLine());
+		BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+		BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(System.out));
 
-		Node[] node = new Node[N + 1];
+		StringTokenizer st;
 
-		for (int i = 1; i <= N; i++) {
-			node[i] = new Node();
+		int n = Integer.parseInt(br.readLine());
+		int e = Integer.parseInt(br.readLine());
+
+		Computer[] computer = new Computer[n + 1];
+
+		for (int i = 1; i <= n; i++) {
+			computer[i] = new Computer(i);
 		}
 
-		for (int t = 0; t < T; t++) {
-			StringTokenizer st = new StringTokenizer(br.readLine(), " ");
+		for (int i = 0; i < e; i++) {
+			st = new StringTokenizer(br.readLine(), " ");
 			int a = Integer.parseInt(st.nextToken());
 			int b = Integer.parseInt(st.nextToken());
 
-			node[a].addLink(b);
-			node[b].addLink(a);
+			computer[a].friends.add(computer[b]);
+			computer[b].friends.add(computer[a]);
 		}
-		
-		DFS(node, 1);
-		
-		bw.write(String.valueOf(result));
+
+		bw.write(String.valueOf(BFS(computer, 1)));
 
 		bw.flush();
 		bw.close();
 		br.close();
 	}
 
-	public static void DFS(Node[] node, int start) {
-		node[start].visit();
-		Integer[] nodeLink = node[start].getLink();
+	public static int BFS(Computer[] computer, int start) {
+		Queue<Computer> queue = new LinkedList<Computer>();
+		int result = -1;
 
-		for (int i = 0; i < nodeLink.length; i++) {
-			int idx = nodeLink[i];
+		queue.add(computer[start]);
+		computer[start].visited = true;
 
-			if (!node[idx].isVisited()) {
-				result += 1;
-				DFS(node, idx);
+		while (!queue.isEmpty()) {
+			result += 1;
+			Computer com = queue.poll();
+
+			for (Computer c : com.friends) {
+				if (!c.visited) {
+					c.visited = true;
+					queue.add(c);
+				}
 			}
 		}
+
+		return result;
 	}
 }
