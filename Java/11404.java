@@ -4,7 +4,7 @@ import java.util.*;
 public class Main {
 	public static final int inf = 87654321;
 	public static int[][] weight;
-	public static int n, m;
+	public static int n, m; 
 
 	public static void main(String[] args) throws IOException {
 		BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
