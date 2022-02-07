@@ -7,7 +7,7 @@ public class Main {
 	public static int N, L, R, day;
 	public static Country[][] country;
 	public static boolean[][] visited;
-	public static boolean state;
+	public static boolean state; 
 
 	public static class Country {
 		int r, c, people;
