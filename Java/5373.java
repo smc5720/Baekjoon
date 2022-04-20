@@ -1,164 +1,356 @@
 import java.io.*;
 import java.util.*;
 
-class Main {
-	static final int U = 0, D = 1, F = 2, B = 3, L = 4, R = 5;
-	static String[] dir = { "윗 면", "아랫 면", "앞 면", "뒷 면", "왼쪽 면", "오른쪽 면" };
-	static InputReader in;
-	static PrintWriter out;
+public class Main {
+	public static BufferedReader br;
+	public static BufferedWriter bw;
+	public static StringTokenizer st;
+	public static int t;
+	public static int[][][] cube;
+	public static String[] color = { "w", "y", "r", "o", "g", "b" };
+	public static String[] dir = { "윗 면", "아랫 면", "앞 면", "뒷 면", "왼쪽 면", "오른쪽 면" };
+	public static final int U = 0;
+	public static final int D = 1;
+	public static final int F = 2;
+	public static final int B = 3;
+	public static final int L = 4;
+	public static final int R = 5;
 
-	int T, n;
-	char[][][] cube;
+	public static void main(String[] args) throws IOException {
+		br = new BufferedReader(new InputStreamReader(System.in));
+		bw = new BufferedWriter(new OutputStreamWriter(System.out));
 
-	void init(char[] colors) {
-		int num = colors.length;
-		cube = new char[num][][];
+		t = Integer.parseInt(br.readLine());
+		cube = new int[6][3][3];
 
-		for (int i = 0; i < num; ++i) {
-			cube[i] = new char[3][3];
-			for (int j = 0; j < 3; ++j)
-				for (int k = 0; k < 3; ++k)
-					cube[i][j][k] = colors[i];
-		}
-	}
-
-	void printCube(boolean state) {
-		if (state) {
-			for (int i = 0; i < 3; i++) {
+		for (int T = 0; T < t; T++) {
+			// 큐브 초기화
+			for (int i = 0; i < 6; i++) {
 				for (int j = 0; j < 3; j++) {
-					System.out.printf("%c", cube[U][j][i]);
-				}
-				System.out.println();
-			}
-		} else {
-			for (int k = 0; k < 6; k++) {
-				System.out.printf("%s", dir[k] + "\n");
-
-				for (int i = 0; i < 3; i++) {
-					for (int j = 0; j < 3; j++) {
-						System.out.printf("%c", cube[k][j][i]);
+					for (int k = 0; k < 3; k++) {
+						cube[i][j][k] = i;
 					}
-					System.out.println();
-				}
-				System.out.println();
-			}
-		}
-	}
-
-	void alter(int f, int u, int l, int d, int r, boolean clk) {
-		char[][] tmp = new char[3][3];
-		char[] tmp2 = new char[3];
-
-		if (clk) {
-			for (int i = 0; i < 3; ++i)
-				for (int j = 0; j < 3; ++j) {
-					tmp[i][j] = cube[f][2 - j][i];
-				}
-			for (int i = 0; i < 3; ++i)
-				tmp2[i] = cube[u][i][0];
-			for (int i = 0; i < 3; ++i)
-				cube[u][i][0] = cube[l][0][2 - i];
-			for (int i = 0; i < 3; ++i)
-				cube[l][0][2 - i] = cube[d][2][i];
-			for (int i = 0; i < 3; ++i)
-				cube[d][2][i] = cube[r][2 - i][2];
-			for (int i = 0; i < 3; ++i)
-				cube[r][2 - i][2] = tmp2[i];
-		} else {
-			for (int i = 0; i < 3; ++i)
-				for (int j = 0; j < 3; ++j) {
-					tmp[i][j] = cube[f][j][2 - i];
-				}
-			for (int i = 0; i < 3; ++i)
-				tmp2[i] = cube[u][i][0];
-			for (int i = 0; i < 3; ++i)
-				cube[u][i][0] = cube[r][2 - i][2];
-			for (int i = 0; i < 3; ++i)
-				cube[r][2 - i][2] = cube[d][2][i];
-			for (int i = 0; i < 3; ++i)
-				cube[d][2][i] = cube[l][0][2 - i];
-			for (int i = 0; i < 3; ++i)
-				cube[l][0][2 - i] = tmp2[i];
-		}
-		cube[f] = tmp;
-	}
-
-	void rotate(String str) {
-		boolean clk = str.charAt(1) == '+';
-
-		switch (str.charAt(0)) {
-		case 'U':
-			alter(U, L, F, R, B, clk);
-			break;
-		case 'D':
-			alter(D, B, R, F, L, clk);
-			break;
-		case 'F':
-			alter(F, U, L, D, R, clk);
-			break;
-		case 'B':
-			alter(B, R, D, L, U, clk);
-			break;
-		case 'L':
-			alter(L, F, U, B, D, clk);
-			break;
-		case 'R':
-			alter(R, D, B, U, F, clk);
-			break;
-		}
-
-		printCube(false);
-	}
-
-	void printU() {
-		for (int i = 0; i < 3; ++i) {
-			for (int j = 0; j < 3; ++j)
-				out.print(cube[0][j][2 - i]);
-			out.println();
-		}
-	}
-
-	void solve() {
-		T = in.nextInt();
-		while (T-- > 0) {
-			init(new char[] { 'w', 'y', 'r', 'o', 'g', 'b' });
-			n = in.nextInt();
-			while (n-- > 0) {
-				rotate(in.nextStr());
-			}
-			printU();
-		}
-	}
-
-	public static void main(String[] args) {
-		in = new InputReader(System.in);
-		out = new PrintWriter(System.out);
-		new Main().solve();
-		out.close();
-	}
-
-	static class InputReader {
-		BufferedReader br;
-		StringTokenizer st;
-
-		public InputReader(InputStream is) {
-			br = new BufferedReader(new InputStreamReader(is));
-			st = null;
-		}
-
-		public String nextStr() {
-			while (st == null || !st.hasMoreTokens()) {
-				try {
-					st = new StringTokenizer(br.readLine());
-				} catch (IOException e) {
-					throw new RuntimeException(e);
 				}
 			}
-			return st.nextToken();
+
+			int n = Integer.parseInt(br.readLine());
+			st = new StringTokenizer(br.readLine(), " ");
+
+			for (int i = 0; i < n; i++) {
+				String cmd = st.nextToken();
+
+				if (cmd.charAt(1) == '-') {
+					for (int j = 0; j < 3; j++) {
+						rotateClockWise(cmd.charAt(0));
+					}
+				}
+
+				else {
+					rotateClockWise(cmd.charAt(0));
+				}
+
+				// printCube();
+			}
+
+			printUpPhase();
 		}
 
-		public int nextInt() {
-			return Integer.parseInt(nextStr());
+		br.close();
+		bw.close();
+	}
+
+	public static void rotateClockWise(char m) throws IOException {
+		int[] tmp = new int[3];
+
+		// U 회전 시 이동하는 칸
+		// R : (2, 0) (1, 0) (0, 0)
+		// B : (2, 2) (2, 1) (2, 0)
+		// L : (0, 2) (1, 2) (2, 2)
+		// F : (0, 0) (0, 1) (0, 2)
+		if (m == 'U') {
+			rotatePhase(U);
+
+			// R → TMP
+			tmp[0] = cube[R][2][0];
+			tmp[1] = cube[R][1][0];
+			tmp[2] = cube[R][0][0];
+
+			// B → R
+			cube[R][2][0] = cube[B][2][2];
+			cube[R][1][0] = cube[B][2][1];
+			cube[R][0][0] = cube[B][2][0];
+
+			// L → B
+			cube[B][2][2] = cube[L][0][2];
+			cube[B][2][1] = cube[L][1][2];
+			cube[B][2][0] = cube[L][2][2];
+
+			// F → L
+			cube[L][0][2] = cube[F][0][0];
+			cube[L][1][2] = cube[F][0][1];
+			cube[L][2][2] = cube[F][0][2];
+
+			// TMP → F
+			cube[F][0][0] = tmp[0];
+			cube[F][0][1] = tmp[1];
+			cube[F][0][2] = tmp[2];
+		}
+
+		// D 회전 시 이동하는 칸
+		// R : (0, 2) (1, 2) (2, 2)
+		// F : (2, 2) (2, 1) (2, 0)
+		// L : (2, 0) (1, 0) (0, 0)
+		// B : (0, 0) (0, 1) (0, 2)
+		if (m == 'D') {
+			rotatePhase(D);
+
+			// R → TMP
+			tmp[0] = cube[R][0][2];
+			tmp[1] = cube[R][1][2];
+			tmp[2] = cube[R][2][2];
+
+			// F → R
+			cube[R][0][2] = cube[F][2][2];
+			cube[R][1][2] = cube[F][2][1];
+			cube[R][2][2] = cube[F][2][0];
+
+			// L → F
+			cube[F][2][2] = cube[L][2][0];
+			cube[F][2][1] = cube[L][1][0];
+			cube[F][2][0] = cube[L][0][0];
+
+			// B → L
+			cube[L][2][0] = cube[B][0][0];
+			cube[L][1][0] = cube[B][0][1];
+			cube[L][0][0] = cube[B][0][2];
+
+			// TMP → B
+			cube[B][0][0] = tmp[0];
+			cube[B][0][1] = tmp[1];
+			cube[B][0][2] = tmp[2];
+		}
+
+		// F 회전 시 이동하는 칸
+		// R : (2, 2) (2, 1) (2, 0)
+		// U : (2, 2) (2, 1) (2, 0)
+		// L : (2, 2) (2, 1) (2, 0)
+		// D : (0, 0) (0, 1) (0, 2)
+		if (m == 'F') {
+			rotatePhase(F);
+
+			// R → TMP
+			tmp[0] = cube[R][2][2];
+			tmp[1] = cube[R][2][1];
+			tmp[2] = cube[R][2][0];
+
+			// U → R
+			cube[R][2][2] = cube[U][2][2];
+			cube[R][2][1] = cube[U][2][1];
+			cube[R][2][0] = cube[U][2][0];
+
+			// L → U
+			cube[U][2][2] = cube[L][2][2];
+			cube[U][2][1] = cube[L][2][1];
+			cube[U][2][0] = cube[L][2][0];
+
+			// D → L
+			cube[L][2][2] = cube[D][0][0];
+			cube[L][2][1] = cube[D][0][1];
+			cube[L][2][0] = cube[D][0][2];
+
+			// TMP → D
+			cube[D][0][0] = tmp[0];
+			cube[D][0][1] = tmp[1];
+			cube[D][0][2] = tmp[2];
+		}
+
+		// B 회전 시 이동하는 칸
+		// R : (0, 0) (0, 1) (0, 2)
+		// D : (2, 2) (2, 1) (2, 0)
+		// L : (0, 0) (0, 1) (0, 2)
+		// U : (0, 0) (0, 1) (0, 2)
+		if (m == 'B') {
+			rotatePhase(B);
+
+			// R → TMP
+			tmp[0] = cube[R][0][0];
+			tmp[1] = cube[R][0][1];
+			tmp[2] = cube[R][0][2];
+
+			// D → R
+			cube[R][0][0] = cube[D][2][2];
+			cube[R][0][1] = cube[D][2][1];
+			cube[R][0][2] = cube[D][2][0];
+
+			// L → D
+			cube[D][2][2] = cube[L][0][0];
+			cube[D][2][1] = cube[L][0][1];
+			cube[D][2][0] = cube[L][0][2];
+
+			// U → L
+			cube[L][0][0] = cube[U][0][0];
+			cube[L][0][1] = cube[U][0][1];
+			cube[L][0][2] = cube[U][0][2];
+
+			// TMP → U
+			cube[U][0][0] = tmp[0];
+			cube[U][0][1] = tmp[1];
+			cube[U][0][2] = tmp[2];
+		}
+
+		// L 회전 시 이동하는 칸
+		// U : (2, 0) (1, 0) (0, 0)
+		// B : (2, 0) (1, 0) (0, 0)
+		// D : (2, 0) (1, 0) (0, 0)
+		// F : (2, 0) (1, 0) (0, 0)
+		if (m == 'L') {
+			rotatePhase(L);
+
+			// U → TMP
+			tmp[0] = cube[U][2][0];
+			tmp[1] = cube[U][1][0];
+			tmp[2] = cube[U][0][0];
+
+			// B → U
+			cube[U][2][0] = cube[B][2][0];
+			cube[U][1][0] = cube[B][1][0];
+			cube[U][0][0] = cube[B][0][0];
+
+			// D → B
+			cube[B][2][0] = cube[D][2][0];
+			cube[B][1][0] = cube[D][1][0];
+			cube[B][0][0] = cube[D][0][0];
+
+			// F → D
+			cube[D][2][0] = cube[F][2][0];
+			cube[D][1][0] = cube[F][1][0];
+			cube[D][0][0] = cube[F][0][0];
+
+			// TMP → F
+			cube[F][2][0] = tmp[0];
+			cube[F][1][0] = tmp[1];
+			cube[F][0][0] = tmp[2];
+		}
+
+		// R 회전 시 이동하는 칸
+		// U : (0, 2) (1, 2) (2, 2)
+		// F : (0, 2) (1, 2) (2, 2)
+		// D : (0, 2) (1, 2) (2, 2)
+		// B : (0, 2) (1, 2) (2, 2)
+		if (m == 'R') {
+			rotatePhase(R);
+
+			// U → TMP
+			tmp[0] = cube[U][0][2];
+			tmp[1] = cube[U][1][2];
+			tmp[2] = cube[U][2][2];
+
+			// F → U
+			cube[U][0][2] = cube[F][0][2];
+			cube[U][1][2] = cube[F][1][2];
+			cube[U][2][2] = cube[F][2][2];
+
+			// D → F
+			cube[F][0][2] = cube[D][0][2];
+			cube[F][1][2] = cube[D][1][2];
+			cube[F][2][2] = cube[D][2][2];
+
+			// B → D
+			cube[D][0][2] = cube[B][0][2];
+			cube[D][1][2] = cube[B][1][2];
+			cube[D][2][2] = cube[B][2][2];
+
+			// TMP → B
+			cube[B][0][2] = tmp[0];
+			cube[B][1][2] = tmp[1];
+			cube[B][2][2] = tmp[2];
+		}
+	}
+
+	public static void rotatePhase(int m) {
+		int[] tmp = new int[3];
+
+		// (0, 2) (0, 1) (0, 0) → TMP
+		tmp[0] = cube[m][0][2];
+		tmp[1] = cube[m][0][1];
+		tmp[2] = cube[m][0][0];
+
+		// (0, 0) (1, 0) (2, 0) → (0, 2) (0, 1) (0, 0)
+		cube[m][0][2] = cube[m][0][0];
+		cube[m][0][1] = cube[m][1][0];
+		cube[m][0][0] = cube[m][2][0];
+
+		// (2, 0) (2, 1) (2, 2) → (0, 0) (1, 0) (2, 0)
+		cube[m][0][0] = cube[m][2][0];
+		cube[m][1][0] = cube[m][2][1];
+		cube[m][2][0] = cube[m][2][2];
+
+		// (2, 2) (1, 2) (0, 2) → (2, 0) (2, 1) (2, 2)
+		cube[m][2][0] = cube[m][2][2];
+		cube[m][2][1] = cube[m][1][2];
+		cube[m][2][2] = cube[m][0][2];
+
+		// TMP → (2, 2) (1, 2) (0, 2)
+		cube[m][2][2] = tmp[0];
+		cube[m][1][2] = tmp[1];
+		cube[m][0][2] = tmp[2];
+	}
+
+	public static void printCube() {
+		System.out.println();
+
+		for (int i = 0; i < 12; i++) {
+			for (int j = 0; j < 9; j++) {
+				if (3 <= j && j < 6) {
+					if (0 <= i && i < 3) {
+						System.out.printf("%s", color[cube[B][i][j - 3]]);
+						continue;
+					}
+
+					if (3 <= i && i < 6) {
+						System.out.printf("%s", color[cube[U][i - 3][j - 3]]);
+						continue;
+					}
+
+					if (6 <= i && i < 9) {
+						System.out.printf("%s", color[cube[F][i - 6][j - 3]]);
+						continue;
+					}
+
+					if (9 <= i && i < 12) {
+						System.out.printf("%s", color[cube[D][i - 9][j - 3]]);
+						continue;
+					}
+				}
+
+				if (3 <= i && i < 6) {
+					if (0 <= j && j < 3) {
+						System.out.printf("%s", color[cube[L][i - 3][j]]);
+						continue;
+					}
+
+					if (6 <= j && j < 9) {
+						System.out.printf("%s", color[cube[R][i - 3][j - 6]]);
+						continue;
+					}
+				}
+
+				System.out.printf(" ");
+			}
+
+			System.out.println();
+		}
+
+		System.out.println();
+	}
+
+	public static void printUpPhase() throws IOException {
+		for (int i = 0; i < 3; i++) {
+			for (int j = 0; j < 3; j++) {
+				bw.write(color[cube[U][i][j]]);
+			}
+
+			bw.newLine();
 		}
 	}
 }
