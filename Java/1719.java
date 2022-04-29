@@ -5,7 +5,7 @@ public class Main {
 	public static BufferedReader br;
 	public static BufferedWriter bw;
 	public static StringTokenizer st;
-	public static int n, m;
+	public static int n, m; 
 	public static int[][] dp, way;
 
 	public static void main(String[] args) throws IOException {
