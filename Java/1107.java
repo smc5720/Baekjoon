@@ -38,7 +38,7 @@ public class Main {
 				int n = (int) (Math.floor(Math.log10(N))) + 1;
 				result = Math.min(n, Math.abs(100 - N));
 				bw.write(String.valueOf(result));
-			}
+			} 
 		}
 
 		bw.flush();
