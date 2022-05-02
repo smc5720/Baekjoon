@@ -10,7 +10,7 @@ public class Main {
 	public static class Player implements Comparable<Player> {
 		int w, pos;
 
-		public Player(int w, int pos) {
+		public Player(int w, int pos) { 
 			this.w = w;
 			this.pos = pos;
 		}
