@@ -16,7 +16,7 @@ public class Main {
 			this.end = end;
 			this.time = time;
 			this.isWormHole = isWormHole;
-		}
+		} 
 	}
 
 	public static void main(String[] args) throws IOException {
