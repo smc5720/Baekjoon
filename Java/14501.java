@@ -12,7 +12,7 @@ public class Main {
 
 		int[] T = new int[N];
 		int[] P = new int[N];
-		int[] dp = new int[N + 1];
+		int[] dp = new int[N + 1]; 
 
 		for (int n = 0; n < N; n++) {
 			st = new StringTokenizer(br.readLine(), " ");
