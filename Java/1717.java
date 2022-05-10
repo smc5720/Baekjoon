@@ -10,7 +10,7 @@ public class Main {
 	public static void main(String[] args) throws IOException {
 		StringTokenizer st = new StringTokenizer(br.readLine(), " ");
 
-		n = Integer.parseInt(st.nextToken());
+		n = Integer.parseInt(st.nextToken()); 
 		m = Integer.parseInt(st.nextToken());
 
 		parent = new int[n + 1];
