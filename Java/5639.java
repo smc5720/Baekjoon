@@ -7,7 +7,7 @@ public class Main {
 
 	public static class Node {
 		int n;
-		Node left, right;
+		Node left, right; 
 
 		public Node(int n) {
 			this.n = n;
