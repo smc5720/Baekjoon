@@ -8,7 +8,7 @@ public class Main {
 	static int N, M, W;
 
 	public static class Road {
-		int start, end, time;
+		int start, end, time; 
 		boolean isWormHole;
 
 		public Road(int start, int end, int time, boolean isWormHole) {
