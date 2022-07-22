@@ -9,7 +9,7 @@ public class Main {
 		BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
 		BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(System.out));
 
-		StringTokenizer st = new StringTokenizer(br.readLine(), " ");
+		StringTokenizer st = new StringTokenizer(br.readLine(), " "); 
 
 		N = Integer.parseInt(st.nextToken());
 		M = Integer.parseInt(st.nextToken());
