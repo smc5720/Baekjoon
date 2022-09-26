@@ -1,187 +1,226 @@
 import java.io.*;
-import java.util.*;
+import java.util.LinkedList;
+import java.util.Queue;
+import java.util.StringTokenizer;
 
 public class Main {
-	public static int N, M;
-	public static char[][] map;
-	public static final int UP = 0;
-	public static final int DOWN = 1;
-	public static final int LEFT = 2;
-	public static final int RIGHT = 3;
-	public static int[] dirY = { -1, 1, 0, 0 };
-	public static int[] dirX = { 0, 0, -1, 1 };
+    public static BufferedReader br;
+    public static BufferedWriter bw;
+    public static StringTokenizer st;
+    public static final int RED = 0;
+    public static final int BLUE = 1;
+    public static final int LEFT = 0;
+    public static final int UP = 1;
+    public static final int RIGHT = 2;
+    public static final int DOWN = 3;
+    public static int[] dirY = {0, -1, 0, 1};
+    public static int[] dirX = {-1, 0, 1, 0};
+    public static char[][] map;
+    public static int N, M;
 
-	public static class Ball {
-		int y, x;
-		boolean isAlive, isRed;
+    public static class Case {
+        Ball[] ball;
+        int count;
 
-		public Ball(int y, int x, boolean isRed, boolean isAlive) {
-			setPos(y, x);
-			this.isAlive = isAlive;
-			this.isRed = isRed;
-		}
+        public Case() {
+            ball = new Ball[2];
+            count = 0;
+        }
 
-		public void setPos(int y, int x) {
-			this.y = y;
-			this.x = x;
-		}
-	}
+        public Case(Case cs) {
+            ball = new Ball[2];
+            count = cs.count;
+            ball[RED] = new Ball(cs.ball[RED].y, cs.ball[RED].x, RED);
+            ball[BLUE] = new Ball(cs.ball[BLUE].y, cs.ball[BLUE].x, BLUE);
+        }
 
-	public static class Condition {
-		int cnt;
-		Ball redBall, blueBall;
+        public void rotateMap(int dir) {
+            count += 1;
+            ball[RED].moved = false;
+            ball[BLUE].moved = false;
 
-		public Condition(Ball redBall, Ball blueBall, int cnt) {
-			this.redBall = redBall;
-			this.blueBall = blueBall;
-			this.cnt = cnt;
-		}
-	}
+            if (dir == LEFT) {
+                if (ball[RED].x < ball[BLUE].x) {
+                    ball[RED].move(dir, ball[BLUE].y, ball[BLUE].x, ball[BLUE].alive);
+                    ball[BLUE].move(dir, ball[RED].y, ball[RED].x, ball[RED].alive);
+                } else {
+                    ball[BLUE].move(dir, ball[RED].y, ball[RED].x, ball[RED].alive);
+                    ball[RED].move(dir, ball[BLUE].y, ball[BLUE].x, ball[BLUE].alive);
+                }
+            } else if (dir == RIGHT) {
+                if (ball[RED].x > ball[BLUE].x) {
+                    ball[RED].move(dir, ball[BLUE].y, ball[BLUE].x, ball[BLUE].alive);
+                    ball[BLUE].move(dir, ball[RED].y, ball[RED].x, ball[RED].alive);
+                } else {
+                    ball[BLUE].move(dir, ball[RED].y, ball[RED].x, ball[RED].alive);
+                    ball[RED].move(dir, ball[BLUE].y, ball[BLUE].x, ball[BLUE].alive);
+                }
+            } else if (dir == UP) {
+                if (ball[RED].y < ball[BLUE].y) {
+                    ball[RED].move(dir, ball[BLUE].y, ball[BLUE].x, ball[BLUE].alive);
+                    ball[BLUE].move(dir, ball[RED].y, ball[RED].x, ball[RED].alive);
+                } else {
+                    ball[BLUE].move(dir, ball[RED].y, ball[RED].x, ball[RED].alive);
+                    ball[RED].move(dir, ball[BLUE].y, ball[BLUE].x, ball[BLUE].alive);
+                }
+            } else if (dir == DOWN) {
+                if (ball[RED].y > ball[BLUE].y) {
+                    ball[RED].move(dir, ball[BLUE].y, ball[BLUE].x, ball[BLUE].alive);
+                    ball[BLUE].move(dir, ball[RED].y, ball[RED].x, ball[RED].alive);
+                } else {
+                    ball[BLUE].move(dir, ball[RED].y, ball[RED].x, ball[RED].alive);
+                    ball[RED].move(dir, ball[BLUE].y, ball[BLUE].x, ball[BLUE].alive);
+                }
+            }
+        }
 
-	public static void main(String[] args) throws IOException {
-		BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
-		BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(System.out));
+        public void printMap() {
+            System.out.println();
 
-		StringTokenizer st = new StringTokenizer(br.readLine());
+            for (int y = 0; y < N; y++) {
+                for (int x = 0; x < M; x++) {
+                    if (ball[RED].alive && ball[RED].y == y && ball[RED].x == x) {
+                        System.out.printf("R");
+                    } else if (ball[BLUE].alive && ball[BLUE].y == y && ball[BLUE].x == x) {
+                        System.out.printf("B");
+                    } else {
+                        System.out.printf("%c", map[y][x]);
+                    }
+                }
+                System.out.println();
+            }
+            System.out.println();
+        }
+    }
 
-		N = Integer.parseInt(st.nextToken());
-		M = Integer.parseInt(st.nextToken());
+    public static class Ball {
+        int y, x, dy, dx, color;
+        boolean alive, moved;
 
-		map = new char[N][M];
+        public Ball(int y, int x, int color) {
+            this.y = y;
+            this.x = x;
+            this.color = color;
+            alive = true;
+        }
 
-		Ball redBall = new Ball(0, 0, true, true);
-		Ball blueBall = new Ball(0, 0, false, true);
+        public void move(int dir, int notY, int notX, boolean notAlive) {
+            if (alive == false) {
+                return;
+            }
 
-		for (int y = 0; y < N; y++) {
-			String str = br.readLine();
-			for (int x = 0; x < M; x++) {
-				map[y][x] = str.charAt(x);
-				if (map[y][x] == 'R') {
-					map[y][x] = '.';
-					redBall.setPos(y, x);
-				} else if (map[y][x] == 'B') {
-					map[y][x] = '.';
-					blueBall.setPos(y, x);
-				}
-			}
-		}
+            checkDir(dir, notY, notX, notAlive);
+            map[y][x] = '.';
 
-		int answer = BFS(redBall, blueBall);
-		bw.write(String.valueOf(answer));
+            // map에서 공을 옮긴다.
+            if (alive == true) {
+                y = dy;
+                x = dx;
 
-		bw.flush();
-		bw.close();
-		br.close();
-	}
+                if (color == RED) {
+                    // System.out.printf("빨간색 공은 %d, %d로 이동\n", dy, dx);
+                } else {
+                    // System.out.printf("파란색 공은 %d, %d로 이동\n", dy, dx);
+                }
+            }
+        }
 
-	public static int BFS(Ball redBall, Ball blueBall) {
-		Queue<Condition> queue = new LinkedList<Condition>();
-		queue.add(new Condition(redBall, blueBall, 0));
+        // 현재 좌표에서 이동 가능한 가장 먼 빈 좌표를 찾는다.
+        public void checkDir(int dir, int notY, int notX, boolean notAlive) {
+            dy = y;
+            dx = x;
 
-		while (!queue.isEmpty() && queue.peek().cnt < 10) {
-			Condition cond = queue.poll();
+            for (int i = 1; i < (dir % 2 == 0 ? M : N); i++) {
+                int ty = y + dirY[dir] * i;
+                int tx = x + dirX[dir] * i;
 
-			for (int i = 0; i < 4; i++) {
-				Ball rb, bb;
+                if (visitable(ty, tx) && (map[ty][tx] == '.' || map[ty][tx] == 'O') && (!notAlive || (notY != ty || notX != tx))) {
+                    dy = ty;
+                    dx = tx;
+                    moved = true;
 
-				if (i == UP) {
-					// 더 위에 있는 공이 먼저 움직여야 한다.
-					if (cond.redBall.y < cond.blueBall.y) {
-						rb = moveBall(cond.redBall, i, cond.blueBall);
-						bb = moveBall(cond.blueBall, i, rb);
-					} else {
-						bb = moveBall(cond.blueBall, i, cond.redBall);
-						rb = moveBall(cond.redBall, i, bb);
-					}
-				} else if (i == DOWN) {
-					// 더 아래에 있는 공이 먼저 움직여야 한다.
-					if (cond.redBall.y > cond.blueBall.y) {
-						rb = moveBall(cond.redBall, i, cond.blueBall);
-						bb = moveBall(cond.blueBall, i, rb);
-					} else {
-						bb = moveBall(cond.blueBall, i, cond.redBall);
-						rb = moveBall(cond.redBall, i, bb);
-					}
-				} else if (i == LEFT) {
-					// 더 왼쪽에 있는 공이 먼저 움직여야 한다.
-					if (cond.redBall.x < cond.blueBall.x) {
-						rb = moveBall(cond.redBall, i, cond.blueBall);
-						bb = moveBall(cond.blueBall, i, rb);
-					} else {
-						bb = moveBall(cond.blueBall, i, cond.redBall);
-						rb = moveBall(cond.redBall, i, bb);
-					}
-				} else {
-					// 더 오른쪽에 있는 공이 먼저 움직여야 한다.
-					if (cond.redBall.x > cond.blueBall.x) {
-						rb = moveBall(cond.redBall, i, cond.blueBall);
-						bb = moveBall(cond.blueBall, i, rb);
-					} else {
-						bb = moveBall(cond.blueBall, i, cond.redBall);
-						rb = moveBall(cond.redBall, i, bb);
-					}
-				}
+                    if (map[ty][tx] == 'O') {
+                        alive = false;
+                        break;
+                    }
+                } else {
+                    break;
+                }
+            }
+        }
 
-				// printBoard(rb, bb);
+        // 해당 좌표가 맵 밖을 벗어나지 않는지 확인한다.
+        public boolean visitable(int ty, int tx) {
+            return (0 <= ty) && (ty < N) && (0 <= tx) && (tx < M);
+        }
+    }
 
-				if (checkBall(cond.redBall, rb) || checkBall(cond.blueBall, bb)) {
-					if (bb.isAlive) {
-						// 파란 구슬은 살았는데
-						if (!rb.isAlive) {
-							// 빨간 구슬이 빠진 경우
-							return cond.cnt + 1;
-						} else {
-							// 빨간 구슬도 산 경우
-							queue.add(new Condition(rb, bb, cond.cnt + 1));
-						}
-					}
-				}
-			}
-		}
+    public static void main(String[] args) throws IOException {
+        br = new BufferedReader(new InputStreamReader(System.in));
+        bw = new BufferedWriter(new OutputStreamWriter(System.out));
+        st = new StringTokenizer(br.readLine(), " ");
 
-		return -1;
-	}
+        N = Integer.parseInt(st.nextToken());
+        M = Integer.parseInt(st.nextToken());
 
-	public static Ball moveBall(Ball ball, int dir, Ball other) {
-		int y = ball.y;
-		int x = ball.x;
+        Case initCase = new Case();
+        map = new char[N][M];
 
-		while (map[y][x] == '.' || map[y][x] == 'O') {
-			if (map[y][x] == 'O') {
-				return new Ball(y, x, ball.isRed, false);
-			}
+        for (int y = 0; y < N; y++) {
+            String str = br.readLine();
 
-			y += dirY[dir];
-			x += dirX[dir];
+            for (int x = 0; x < M; x++) {
+                map[y][x] = str.charAt(x);
 
-			if (map[y][x] == '#' || (y == other.y && x == other.x && other.isAlive)) {
-				y -= dirY[dir];
-				x -= dirX[dir];
-				break;
-			}
-		}
+                if (map[y][x] == 'R') {
+                    map[y][x] = '.';
+                    initCase.ball[RED] = new Ball(y, x, RED);
+                } else if (map[y][x] == 'B') {
+                    map[y][x] = '.';
+                    initCase.ball[BLUE] = new Ball(y, x, BLUE);
+                }
+            }
+        }
 
-		return new Ball(y, x, ball.isRed, true);
-	}
+        Queue<Case> queue = new LinkedList<>();
+        queue.add(initCase);
 
-	// 볼이 움직였는지 확인한다.
-	public static Boolean checkBall(Ball b1, Ball b2) {
-		return (b1.y != b2.y) || ((b1.x != b2.x));
-	}
+        int answer = -1;
 
-	public static void printBoard(Ball red, Ball blue) {
-		System.out.println();
-		for (int y = 0; y < N; y++) {
-			for (int x = 0; x < M; x++) {
-				if (red.y == y && red.x == x && red.isAlive) {
-					System.out.printf("R", map[y][x]);
-				} else if (blue.y == y && blue.x == x && blue.isAlive) {
-					System.out.printf("B", map[y][x]);
-				} else {
-					System.out.printf("%c", map[y][x]);
-				}
-			}
-			System.out.println();
-		}
-	}
+        while (!queue.isEmpty() && answer == -1) {
+            Case cs = queue.poll();
+
+            for (int i = 0; i < 4; i++) {
+                Case tmp = new Case(cs);
+                tmp.rotateMap(i);
+
+                // 파란 구슬이 빠졌다면 다음 경우를 생각하지 않아도 된다.
+                if (!tmp.ball[BLUE].alive) {
+                    continue;
+                }
+
+                // 빨간 구슬만 빠졌다면 상황이 종료된 것이다.
+                if (!tmp.ball[RED].alive) {
+                    answer = answer == -1 ? tmp.count : Math.min(answer, tmp.count);
+                    continue;
+                }
+
+                // 10번 이하로 움직여서 빨간 구슬을 구멍을 통해 빼낼 수 없으면 다음 경우를 생각하지 않아도 된다.
+                if (tmp.count == 10) {
+                    continue;
+                }
+
+                if (!tmp.ball[RED].moved && !tmp.ball[BLUE].moved) {
+                    continue;
+                }
+
+                queue.add(tmp);
+            }
+        }
+
+        bw.write(String.valueOf(answer));
+        bw.flush();
+        bw.close();
+        br.close();
+    }
 }
