@@ -1,227 +1,265 @@
+import java.awt.*;
 import java.io.*;
-import java.util.*;
+import java.util.LinkedList;
+import java.util.Queue;
+import java.util.StringTokenizer;
 
 public class Main {
-	public static int N, result;
-	public static final int UP = 0;
-	public static final int DOWN = 1;
-	public static final int LEFT = 2;
-	public static final int RIGHT = 3;
-	public static int[] dirY = { -1, 1, 0, 0 };
-	public static int[] dirX = { 0, 0, -1, 1 };
+    public static BufferedReader br;
+    public static BufferedWriter bw;
+    public static StringTokenizer st;
+    public static final int LEFT = 0;
+    public static final int RIGHT = 1;
+    public static final int UP = 2;
+    public static final int DOWN = 3;
+    public static final int[] dy = {0, 0, -1, 1};
+    public static final int[] dx = {-1, 1, 0, 0};
+    public static int N;
 
-	public static void main(String[] args) throws IOException {
-		BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
-		BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(System.out));
+    public static class Board {
+        int[][] map;
+        boolean isMoved;
+        int moveCnt;
 
-		StringTokenizer st;
+        public Board() {
+            map = new int[N][N];
+            moveCnt = 0;
+        }
 
-		N = Integer.parseInt(br.readLine());
-		result = 0;
-		int[][] map = new int[N + 2][N + 2];
+        public Board(Board bd) {
+            map = new int[N][N];
+            moveCnt = bd.moveCnt;
 
-		for (int y = 0; y <= N + 1; y++) {
-			for (int x = 0; x <= N + 1; x++) {
-				if (y == 0 || x == 0 || y == N + 1 || x == N + 1) {
-					map[y][x] = -1;
-				}
-			}
-		}
+            for (int y = 0; y < N; y++) {
+                for (int x = 0; x < N; x++) {
+                    map[y][x] = bd.map[y][x];
+                }
+            }
+        }
 
-		for (int y = 1; y <= N; y++) {
-			st = new StringTokenizer(br.readLine(), " ");
-			for (int x = 1; x <= N; x++) {
-				map[y][x] = Integer.parseInt(st.nextToken());
-				result = Math.max(result, map[y][x]);
-			}
-		}
+        public int getMaxVal() {
+            int maxVal = 0;
 
-		DFS(map, 0);
+            for (int y = 0; y < N; y++) {
+                for (int x = 0; x < N; x++) {
+                    if (map[y][x] > 0) {
+                        maxVal = Math.max(maxVal, map[y][x]);
+                    }
+                }
+            }
 
-		bw.write(String.valueOf(result));
+            return maxVal;
+        }
 
-		bw.flush();
-		bw.close();
-		br.close();
-	}
+        public void move(int dir) {
+            moveCnt += 1;
+            isMoved = false;
 
-	public static void DFS(int[][] map, int depth) {
-		if (depth == 5) {
-			return;
-		}
+            if (dir < 2) {
+                for (int y = 0; y < N; y++) {
+                    if (dir == LEFT) {
+                        for (int x = 0; x < N; x++) {
+                            if (map[y][x] > 0) {
+                                Point pos = new Point();
+                                checkPos(y, x, dir, pos);
+                                moveNum(y, x, dir, pos);
+                                // printMap();
+                            }
+                        }
+                    } else if (dir == RIGHT) {
+                        for (int x = N - 1; x >= 0; x--) {
+                            if (map[y][x] > 0) {
+                                Point pos = new Point();
+                                checkPos(y, x, dir, pos);
+                                moveNum(y, x, dir, pos);
+                            }
+                        }
+                    }
+                }
+            } else {
+                if (dir == UP) {
+                    for (int y = 0; y < N; y++) {
+                        for (int x = 0; x < N; x++) {
+                            if (map[y][x] > 0) {
+                                Point pos = new Point();
+                                checkPos(y, x, dir, pos);
+                                moveNum(y, x, dir, pos);
+                            }
+                        }
+                    }
+                } else if (dir == DOWN) {
+                    for (int y = N - 1; y >= 0; y--) {
+                        for (int x = 0; x < N; x++) {
+                            if (map[y][x] > 0) {
+                                Point pos = new Point();
+                                checkPos(y, x, dir, pos);
+                                moveNum(y, x, dir, pos);
+                            }
+                        }
+                    }
+                }
+            }
 
-		int[][] board = new int[N + 2][N + 2];
+            cleanMap();
+        }
 
-		for (int i = 0; i < 4; i++) {
-			copyMap(map, board);
-			if (moveBoard(board, i)) {
-				// printBoard(map, board, i, depth + 1);
-				DFS(board, depth + 1);
-			}
-		}
-	}
+        public void checkPos(int y, int x, int dir, Point pos) {
+            pos.y = y;
+            pos.x = x;
 
-	// origin의 내용을 copy에 복사한다.
-	public static void copyMap(int[][] origin, int[][] copy) {
-		for (int y = 0; y <= N + 1; y++) {
-			for (int x = 0; x <= N + 1; x++) {
-				copy[y][x] = origin[y][x];
-			}
-		}
-	}
+            if (dir == LEFT) {
+                for (int tx = x - 1; tx >= 0; tx--) {
+                    if (!outOfMap(y, tx)) {
+                        if (map[y][tx] == 0) {
+                            pos.x = tx;
+                        } else if (map[y][tx] == -1) {
+                            pos.x = tx;
+                            return;
+                        } else if (map[y][tx] == map[y][x]) {
+                            pos.x = tx;
+                            return;
+                        } else {
+                            return;
+                        }
+                    } else {
+                        return;
+                    }
+                }
+            } else if (dir == RIGHT) {
+                for (int tx = x + 1; tx < N; tx++) {
+                    if (!outOfMap(y, tx)) {
+                        if (map[y][tx] == 0) {
+                            pos.x = tx;
+                        } else if (map[y][tx] == -1) {
+                            pos.x = tx;
+                            return;
+                        } else if (map[y][tx] == map[y][x]) {
+                            pos.x = tx;
+                            return;
+                        } else {
+                            return;
+                        }
+                    } else {
+                        return;
+                    }
+                }
+            } else if (dir == UP) {
+                for (int ty = y - 1; ty >= 0; ty--) {
+                    if (!outOfMap(ty, x)) {
+                        if (map[ty][x] == 0) {
+                            pos.y = ty;
+                        } else if (map[ty][x] == -1) {
+                            pos.y = ty;
+                            return;
+                        } else if (map[ty][x] == map[y][x]) {
+                            pos.y = ty;
+                            return;
+                        } else {
+                            return;
+                        }
+                    } else {
+                        return;
+                    }
+                }
+            } else if (dir == DOWN) {
+                for (int ty = y + 1; ty < N; ty++) {
+                    if (!outOfMap(ty, x)) {
+                        if (map[ty][x] == 0) {
+                            pos.y = ty;
+                        } else if (map[ty][x] == -1) {
+                            pos.y = ty;
+                            return;
+                        } else if (map[ty][x] == map[y][x]) {
+                            pos.y = ty;
+                            return;
+                        } else {
+                            return;
+                        }
+                    } else {
+                        return;
+                    }
+                }
+            }
+        }
 
-	public static void printBoard(int[][] map, int[][] board, int dir, int depth) {
-		String[] direction = { "UP", "DOWN", "LEFT", "RIGHT" };
+        public void moveNum(int y, int x, int dir, Point pos) {
+            if (y == pos.y && x == pos.x) {
+                return;
+            }
 
-		System.out.println();
-		for (int i = 1; i < depth; i++) {
-			System.out.printf("\t");
-		}
-		System.out.printf("%s\t%d\n", direction[dir], depth);
+            if (map[pos.y][pos.x] == map[y][x]) {
+                map[pos.y][pos.x] *= 2;
+                map[y][x] = 0;
+                map[pos.y + dy[dir] * (-1)][pos.x + dx[dir] * (-1)] = -1;
+            } else if (map[pos.y][pos.x] <= 0) {
+                map[pos.y][pos.x] = map[y][x];
+                map[y][x] = 0;
+            }
 
-		for (int y = 1; y <= N; y++) {
-			for (int x = 1; x <= N; x++) {
-				System.out.printf("%d\t", map[y][x]);
-			}
+            isMoved = true;
+        }
 
-			System.out.printf("\t\t");
+        public boolean outOfMap(int ty, int tx) {
+            return !((0 <= ty) && (ty < N) && (0 <= tx) && (tx < N));
+        }
 
-			for (int x = 1; x <= N; x++) {
-				System.out.printf("%d\t", board[y][x]);
-			}
-			System.out.println();
-		}
-	}
+        public void cleanMap() {
+            for (int y = 0; y < N; y++) {
+                for (int x = 0; x < N; x++) {
+                    if (map[y][x] == -1) {
+                        map[y][x] = 0;
+                    }
+                }
+            }
+        }
 
-	public static boolean visitable(int y, int x) {
-		return (0 <= y) && (y <= N + 1) && (0 <= x) && (x <= N + 1);
-	}
+        public void printMap() {
+            System.out.println();
+            for (int y = 0; y < N; y++) {
+                for (int x = 0; x < N; x++) {
+                    System.out.printf("%-5d ", map[y][x]);
+                }
+                System.out.println();
+            }
+            System.out.println();
+        }
+    }
 
-	public static boolean moveBoard(int[][] map, int dir) {
-		boolean isChanged = false;
+    public static void main(String[] args) throws IOException {
+        br = new BufferedReader(new InputStreamReader(System.in));
+        bw = new BufferedWriter(new OutputStreamWriter(System.out));
+        N = Integer.parseInt(br.readLine());
 
-		if (dir == UP) {
-			for (int y = 1; y <= N; y++) {
-				for (int x = 1; x <= N; x++) {
-					int val = map[y][x];
-					int tmpY = y + 1;
+        Board board = new Board();
 
-					while (visitable(tmpY, x)) {
-						if (val == 0) {
-							if (map[tmpY][x] > 0) {
-								val = map[tmpY][x];
-								map[tmpY][x] = 0;
-								isChanged = true;
-							}
-						} else {
-							if (map[tmpY][x] != 0) {
-								if (val == map[tmpY][x]) {
-									map[y][x] = 2 * val;
-									map[tmpY][x] = 0;
-									isChanged = true;
-								} else {
-									map[y][x] = val;
-								}
-								result = Math.max(map[y][x], result);
-								break;
-							}
-						}
-						tmpY += 1;
-					}
-				}
-			}
-		} else if (dir == DOWN) {
-			for (int y = N; y >= 1; y--) {
-				for (int x = 1; x <= N; x++) {
-					int val = map[y][x];
-					int tmpY = y - 1;
+        for (int y = 0; y < N; y++) {
+            st = new StringTokenizer(br.readLine(), " ");
+            for (int x = 0; x < N; x++) {
+                board.map[y][x] = Integer.parseInt(st.nextToken());
+            }
+        }
 
-					while (visitable(tmpY, x)) {
-						if (val == 0) {
-							if (map[tmpY][x] > 0) {
-								val = map[tmpY][x];
-								map[tmpY][x] = 0;
-								isChanged = true;
-							}
-						} else {
-							if (map[tmpY][x] != 0) {
-								if (val == map[tmpY][x]) {
-									map[y][x] = 2 * val;
-									map[tmpY][x] = 0;
-									isChanged = true;
-								} else {
-									map[y][x] = val;
-								}
-								result = Math.max(map[y][x], result);
-								break;
-							}
-						}
-						tmpY -= 1;
-					}
-				}
-			}
-		} else if (dir == LEFT) {
-			for (int y = 1; y <= N; y++) {
-				for (int x = 1; x <= N; x++) {
-					int val = map[y][x];
-					int tmpX = x + 1;
+        int maxVal = board.getMaxVal();
+        Queue<Board> queue = new LinkedList<>();
+        queue.add(board);
 
-					while (visitable(y, tmpX)) {
-						if (val == 0) {
-							if (map[y][tmpX] > 0) {
-								val = map[y][tmpX];
-								map[y][tmpX] = 0;
-								isChanged = true;
-							}
-						} else {
-							if (map[y][tmpX] != 0) {
-								if (val == map[y][tmpX]) {
-									map[y][x] = 2 * val;
-									map[y][tmpX] = 0;
-									isChanged = true;
-								} else {
-									map[y][x] = val;
-								}
-								result = Math.max(map[y][x], result);
-								break;
-							}
-						}
-						tmpX += 1;
-					}
-				}
-			}
-		} else {
-			for (int y = 1; y <= N; y++) {
-				for (int x = N; x >= 1; x--) {
-					int val = map[y][x];
-					int tmpX = x - 1;
+        while (!queue.isEmpty()) {
+            Board bd = queue.poll();
+            for (int i = 0; i < 4; i++) {
+                Board tmp = new Board(bd);
+                tmp.move(i);
+                if (tmp.isMoved) {
+                    maxVal = Math.max(maxVal, tmp.getMaxVal());
+                    if (tmp.moveCnt < 5) {
+                        queue.add(tmp);
+                    }
+                }
+            }
+        }
 
-					while (visitable(y, tmpX)) {
-						if (val == 0) {
-							if (map[y][tmpX] > 0) {
-								val = map[y][tmpX];
-								map[y][tmpX] = 0;
-								isChanged = true;
-							}
-						} else {
-							if (map[y][tmpX] != 0) {
-								if (val == map[y][tmpX]) {
-									map[y][x] = 2 * val;
-									map[y][tmpX] = 0;
-									isChanged = true;
-								} else {
-									map[y][x] = val;
-								}
-								result = Math.max(map[y][x], result);
-								break;
-							}
-						}
-						tmpX -= 1;
-					}
-				}
-			}
-		}
-
-		return isChanged;
-	}
+        bw.write(String.valueOf(maxVal));
+        bw.flush();
+        bw.close();
+        br.close();
+    }
 }
