@@ -1,150 +1,148 @@
-import java.awt.Point;
+import java.awt.*;
 import java.io.*;
-import java.util.*;
+import java.util.LinkedList;
+import java.util.Queue;
+import java.util.StringTokenizer;
 
 public class Main {
-	public static int N, K, L;
-	public static int[][] map;
-	public static int[] dirY = { 0, 1, 0, -1 };
-	public static int[] dirX = { 1, 0, -1, 0 };
-	public static Queue<Point> snake;
-	public static int snakeDir = 0;
-	public static Point snakeHead = new Point(0, 0);
+    public static BufferedReader br;
+    public static BufferedWriter bw;
+    public static StringTokenizer st;
+    public static final int[] dy = {0, 1, 0, -1};
+    public static final int[] dx = {1, 0, -1, 0};
+    public static Queue<Point> snake;
+    public static Point head;
+    public static int[][] board;
+    public static int N, K, L, d, moveCnt;
+    public static boolean gameOver;
 
-	public static class Cmd {
-		int timer;
-		char dir;
+    public static class Moving {
+        int second;
+        char dir;
 
-		public Cmd(int timer, char dir) {
-			this.timer = timer;
-			this.dir = dir;
-		}
-	}
+        public Moving(int X, char C) {
+            second = X;
+            dir = C;
+        }
+    }
 
-	public static void main(String[] args) throws IOException {
-		BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
-		BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(System.out));
+    public static void main(String[] args) throws IOException {
+        br = new BufferedReader(new InputStreamReader(System.in));
+        bw = new BufferedWriter(new OutputStreamWriter(System.out));
 
-		StringTokenizer st;
+        N = Integer.parseInt(br.readLine());
+        K = Integer.parseInt(br.readLine());
+        d = 0;
+        moveCnt = 0;
 
-		snake = new LinkedList<Point>();
-		snake.add(new Point(0, 0));
+        board = new int[N + 1][N + 1];
+        board[1][1] = 2;
 
-		N = Integer.parseInt(br.readLine());
-		K = Integer.parseInt(br.readLine());
+        head = new Point(1, 1);
+        snake = new LinkedList<>();
+        snake.add(new Point(1, 1));
 
-		map = new int[N][N];
+        for (int k = 0; k < K; k++) {
+            st = new StringTokenizer(br.readLine(), " ");
+            int y = Integer.parseInt(st.nextToken());
+            int x = Integer.parseInt(st.nextToken());
+            board[y][x] = 1;
+        }
 
-		for (int y = 0; y < N; y++) {
-			for (int x = 0; x < N; x++) {
-				map[y][x] = 0;
-			}
-		}
+        L = Integer.parseInt(br.readLine());
+        Moving[] moving = new Moving[L];
 
-		map[0][0] = 2;
+        for (int l = 0; l < L; l++) {
+            st = new StringTokenizer(br.readLine(), " ");
+            int X = Integer.parseInt(st.nextToken());
+            char C = st.nextToken().charAt(0);
+            moving[l] = new Moving(X, C);
+        }
 
-		for (int k = 0; k < K; k++) {
-			st = new StringTokenizer(br.readLine(), " ");
+        // printBoard();
 
-			int y = Integer.parseInt(st.nextToken()) - 1;
-			int x = Integer.parseInt(st.nextToken()) - 1;
+        loop:
+        for (Moving move : moving) {
+            for (int i = moveCnt; i < move.second; i++) {
+                // 이동
+                moveSnake();
+                // printBoard();
 
-			map[y][x] = 1;
-		}
+                if (gameOver) {
+                    break loop;
+                }
+            }
 
-		L = Integer.parseInt(br.readLine());
+            // 회전
+            if (move.dir == 'L') {
+                d = (d + 3) % 4;
+            } else {
+                d = (d + 1) % 4;
+            }
+        }
 
-		Queue<Cmd> queue = new LinkedList<Cmd>();
+        while (!gameOver) {
+            moveSnake();
+        }
 
-		for (int l = 0; l < L; l++) {
-			st = new StringTokenizer(br.readLine(), " ");
+        bw.write(String.valueOf(moveCnt));
+        bw.flush();
+        bw.close();
+        br.close();
+    }
 
-			int X = Integer.parseInt(st.nextToken());
-			char C = st.nextToken().charAt(0);
+    public static void moveSnake() {
+        int ty = head.y + dy[d];
+        int tx = head.x + dx[d];
+        moveCnt += 1;
 
-			queue.add(new Cmd(X, C));
-		}
+        if (visitable(ty, tx)) {
+            // 헤드 위치 설정
+            head.y = ty;
+            head.x = tx;
+            // 뱀이 빈 공간으로 이동한 경우
+            if (board[ty][tx] == 0) {
+                // snake 꼬리 빼기
+                Point tail = snake.poll();
+                board[tail.y][tail.x] = 0;
+                // System.out.printf("꼬리: (%d, %d) = %d\n", tail.y, tail.x, board[tail.y][tail.x]);
+            }
+            // 보드에 헤드 표시
+            board[ty][tx] = 2;
+            // System.out.printf("머리: (%d, %d) = %d\n", ty, tx, board[ty][tx]);
+            // snake 몸 추가
+            snake.add(new Point(tx, ty));
+        } else {
+            // 게임 종료
+            gameOver = true;
+        }
+    }
 
-		int timer = 0;
+    public static boolean visitable(int y, int x) {
+        return (1 <= y) && (y <= N) && (1 <= x) && (x <= N) && (board[y][x] <= 1);
+    }
 
-		while (moveSnake()) {
-			timer += 1;
+    public static void printBoard() {
+        System.out.println("moveCnt = " + moveCnt);
+        System.out.println();
 
-			if (!queue.isEmpty() && timer == queue.peek().timer) {
-				turnSnake(queue.poll().dir);
-			}
-		}
+        for (int y = 0; y <= N + 1; y++) {
+            for (int x = 0; x <= N + 1; x++) {
+                if (y == N + 1 || x == N + 1 || y == 0 || x == 0) {
+                    System.out.printf("■ ");
+                    continue;
+                }
 
-		bw.write(String.valueOf(timer + 1));
-
-		bw.flush();
-		bw.close();
-		br.close();
-	}
-
-	public static void turnSnake(char Dir) {
-		if (Dir == 'L') {
-			snakeDir -= 1;
-			if (snakeDir < 0) {
-				snakeDir = 3;
-			}
-		} else {
-			snakeDir += 1;
-			if (snakeDir > 3) {
-				snakeDir = 0;
-			}
-		}
-
-		/*
-		 * if (snakeDir == 0) { System.out.println("방향 변경: 우"); } else if (snakeDir ==
-		 * 1) { System.out.println("방향 변경: 하"); } else if (snakeDir == 2) {
-		 * System.out.println("방향 변경: 좌"); } else if (snakeDir == 3) {
-		 * System.out.println("방향 변경: 상"); }
-		 */
-
-		return;
-	}
-
-	// 뱀이 해당 방향으로 이동이 가능한지를 반환한다.
-	public static boolean moveSnake() {
-		// printMap();
-		// System.out.printf("y(%d) + %d\nx(%d) + %d\n", snakeHead.y, dirY[snakeDir],
-		// snakeHead.x, dirX[snakeDir]);
-
-		int tempY = snakeHead.y + dirY[snakeDir];
-		int tempX = snakeHead.x + dirX[snakeDir];
-
-		// System.out.printf("(y, x) -> (%d, %d)\n", tempY, tempX);
-
-		if (visitable(tempY, tempX)) {
-			snake.add(new Point(tempX, tempY));
-			snakeHead = new Point(tempX, tempY);
-
-			if (map[tempY][tempX] == 0) {
-				Point snakeTail = snake.poll();
-				map[snakeTail.y][snakeTail.x] = 0;
-			}
-
-			map[tempY][tempX] = 2;
-		} else {
-			return false;
-		}
-
-		return true;
-	}
-
-	public static boolean visitable(int y, int x) {
-		return (0 <= y) && (y < N) && (0 <= x) && (x < N) && (map[y][x] != 2);
-	}
-
-	public static void printMap() {
-		System.out.println();
-
-		for (int y = 0; y < N; y++) {
-			for (int x = 0; x < N; x++) {
-				System.out.printf("%d ", map[y][x]);
-			}
-			System.out.println();
-		}
-	}
+                if (board[y][x] == 0) {
+                    System.out.printf("  ");
+                } else if (board[y][x] == 1) {
+                    System.out.printf("# ");
+                } else {
+                    System.out.printf("* ");
+                }
+            }
+            System.out.println();
+        }
+        System.out.println();
+    }
 }
