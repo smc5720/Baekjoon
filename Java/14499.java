@@ -1,126 +1,138 @@
 import java.io.*;
-import java.util.*;
+import java.util.StringTokenizer;
 
 public class Main {
-	public static int N, M, Y, X, K;
-	public static final int EAST = 1;
-	public static final int WEST = 2;
-	public static final int NORTH = 3;
-	public static final int SOUTH = 4;
-	public static int[] dice = new int[7];
-	public static int top;
-	public static int up;
-	public static int right;
-	public static int bottom;
-	public static int down;
-	public static int left;
-	public static int[][] map;
-	public static BufferedReader br;
-	public static BufferedWriter bw;
+    public static BufferedReader br;
+    public static BufferedWriter bw;
+    public static StringTokenizer st;
+    public static int N, M, x, y, K;
+    public static int[][] map;
+    public static int FRONT = 0;
+    public static int BACK = 0;
+    public static int LEFT = 0;
+    public static int RIGHT = 0;
+    public static int UP = 0;
+    public static int DOWN = 0;
+    public static final int[] dx = {0, 0, 0, -1, 1};
+    public static final int[] dy = {0, 1, -1, 0, 0};
 
-	public static void main(String[] args) throws IOException {
-		br = new BufferedReader(new InputStreamReader(System.in));
-		bw = new BufferedWriter(new OutputStreamWriter(System.out));
+    public static void main(String[] args) throws IOException {
+        br = new BufferedReader(new InputStreamReader(System.in));
+        bw = new BufferedWriter(new OutputStreamWriter(System.out));
+        st = new StringTokenizer(br.readLine(), " ");
 
-		StringTokenizer st = new StringTokenizer(br.readLine(), " ");
+        N = Integer.parseInt(st.nextToken());
+        M = Integer.parseInt(st.nextToken());
+        x = Integer.parseInt(st.nextToken());
+        y = Integer.parseInt(st.nextToken());
+        K = Integer.parseInt(st.nextToken());
 
-		N = Integer.parseInt(st.nextToken());
-		M = Integer.parseInt(st.nextToken());
-		Y = Integer.parseInt(st.nextToken());
-		X = Integer.parseInt(st.nextToken());
-		K = Integer.parseInt(st.nextToken());
+        map = new int[N][M];
 
-		map = new int[N][M];
+        for (int n = 0; n < N; n++) {
+            st = new StringTokenizer(br.readLine(), " ");
+            for (int m = 0; m < M; m++) {
+                map[n][m] = Integer.parseInt(st.nextToken());
+            }
+        }
 
-		top = 1;
-		up = 5;
-		right = 3;
-		bottom = 6;
-		down = 2;
-		left = 4;
+        st = new StringTokenizer(br.readLine(), " ");
+        StringBuilder sb = new StringBuilder();
 
-		for (int i = 1; i <= 6; i++) {
-			dice[i] = 0;
-		}
+        for (int k = 0; k < K; k++) {
+            int cmd = Integer.parseInt(st.nextToken());
+            int tx = x + dx[cmd];
+            int ty = y + dy[cmd];
 
-		for (int y = 0; y < N; y++) {
-			st = new StringTokenizer(br.readLine(), " ");
-			for (int x = 0; x < M; x++) {
-				map[y][x] = Integer.parseInt(st.nextToken());
-			}
-		}
+            if (visitable(tx, ty)) {
+                x = tx;
+                y = ty;
+                rotate(cmd);
 
-		st = new StringTokenizer(br.readLine(), " ");
-		for (int k = 0; k < K; k++) {
-			int r = moveDice(Integer.parseInt(st.nextToken()));
-			if (0 <= r) {
-				bw.write(r + "\n");
-			}
-		}
+                if (map[x][y] == 0) {
+                    map[x][y] = DOWN;
+                } else {
+                    DOWN = map[x][y];
+                    map[x][y] = 0;
+                }
 
-		bw.flush();
-		bw.close();
-		br.close();
-	}
+                sb.append(UP + "\n");
+            }
+        }
 
-	public static boolean visitable(int y, int x) {
-		return (0 <= y) && (y < N) && (0 <= x) && (x < M);
-	}
+        bw.write(sb.toString());
+        bw.flush();
+        bw.close();
+        br.close();
+    }
 
-	public static int moveDice(int dir) {
-		int[] dirY = { 0, 0, 0, -1, 1 };
-		int[] dirX = { 0, 1, -1, 0, 0 };
+    public static boolean visitable(int tx, int ty) {
+        return (0 <= tx) && (tx < N) && (0 <= ty) && (ty < M);
+    }
 
-		int tmpY = Y + dirY[dir];
-		int tmpX = X + dirX[dir];
+    public static void rotate(int dir) {
+        // 동 (FRONT, BACK 고정)
+        if (dir == 1) {
+            // DOWN → LEFT
+            int tmp = LEFT;
+            LEFT = DOWN;
 
-		if (visitable(tmpY, tmpX)) {
-			Y = tmpY;
-			X = tmpX;
+            // RIGHT → DOWN
+            DOWN = RIGHT;
 
-			if (dir == NORTH) {
-				int tmp = top;
-				top = up;
-				up = bottom;
-				bottom = down;
-				down = tmp;
-			} else if (dir == SOUTH) {
-				int tmp = top;
-				top = down;
-				down = bottom;
-				bottom = up;
-				up = tmp;
-			} else if (dir == EAST) {
-				int tmp = top;
-				top = right;
-				right = bottom;
-				bottom = left;
-				left = tmp;
-			} else {
-				int tmp = top;
-				top = left;
-				left = bottom;
-				bottom = right;
-				right = tmp;
-			}
+            // UP → RIGHT
+            RIGHT = UP;
 
-			// 이동한 칸에 쓰여 있는 수가 0이면
-			if (map[Y][X] == 0) {
-				// 주사위의 바닥면에 쓰여 있는 수가 칸에 복사된다.
-				map[Y][X] = dice[bottom];
-			}
+            // LEFT → UP
+            UP = tmp;
+        }
 
-			// 0이 아닌 경우에는
-			else {
-				// 칸에 쓰여 있는 수가 주사위의 바닥면으로 복사되며,
-				dice[bottom] = map[Y][X];
-				// 칸에 쓰여 있는 수는 0이 된다.
-				map[Y][X] = 0;
-			}
+        // 서 (FRONT, BACK 고정)
+        else if (dir == 2) {
+            // DOWN → RIGHT
+            int tmp = RIGHT;
+            RIGHT = DOWN;
 
-			return dice[top];
-		}
+            // LEFT → DOWN
+            DOWN = LEFT;
 
-		return -1;
-	}
+            // UP → LEFT
+            LEFT = UP;
+
+            // RIGHT → UP
+            UP = tmp;
+        }
+
+        // 북 (LEFT, RIGHT 고정)
+        else if (dir == 3) {
+            // UP → BACK
+            int tmp = BACK;
+            BACK = UP;
+
+            // FRONT → UP
+            UP = FRONT;
+
+            // DOWN → FRONT
+            FRONT = DOWN;
+
+            // BACK → DOWN
+            DOWN = tmp;
+        }
+
+        // 남 (LEFT, RIGHT 고정)
+        else {
+            // UP → FRONT
+            int tmp = FRONT;
+            FRONT = UP;
+
+            // BACK → UP
+            UP = BACK;
+
+            // DOWN → BACK
+            BACK = DOWN;
+
+            // FRONT → DOWN
+            DOWN = tmp;
+        }
+    }
 }
