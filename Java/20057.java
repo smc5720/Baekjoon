@@ -1,151 +1,148 @@
+import java.awt.*;
 import java.io.*;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.Queue;
+import java.util.StringTokenizer;
 
 public class Main {
-	public static BufferedReader br;
-	public static BufferedWriter bw;
-	public static int[][] map;
-	public static int N;
-	public static int answer;
+    public static BufferedReader br;
+    public static BufferedWriter bw;
+    public static StringTokenizer st;
+    public static final int[] dr = {0, 1, 0, -1};
+    public static final int[] dc = {-1, 0, 1, 0};
+    public static int[] sr = {-2, -1, -1, -1, 0, 1, 1, 1, 2};
+    public static int[] sc = {0, -1, 0, 1, -2, -1, 0, 1, 0};
+    public static int[] sp = {2, 10, 7, 1, 5, 10, 7, 1, 2};
+    public static int N, r, c, outSand;
+    public static Tile[][] tiles;
 
-	public static void main(String[] args) throws IOException {
-		br = new BufferedReader(new InputStreamReader(System.in));
-		bw = new BufferedWriter(new OutputStreamWriter(System.out));
+    public static class Tile {
+        int r, c, sand;
 
-		N = Integer.parseInt(br.readLine());
-		map = new int[N][N];
-		answer = 0;
+        public Tile(int r, int c, int sand) {
+            this.r = r;
+            this.c = c;
+            this.sand = sand;
+        }
 
-		StringTokenizer st;
+        public void moveSand(int d) {
+            int remain = sand;
 
-		for (int r = 0; r < N; r++) {
-			st = new StringTokenizer(br.readLine(), " ");
+            for (int i = 0; i < 9; i++) {
+                int tr = this.r + sr[i];
+                int tc = this.c + sc[i];
+                int ts = sand * sp[i] / 100;
 
-			for (int c = 0; c < N; c++) {
-				map[r][c] = Integer.parseInt(st.nextToken());
-			}
-		}
+                if (visitable(tr, tc)) {
+                    tiles[tr][tc].sand += ts;
+                    remain -= ts;
+                } else {
+                    outSand += ts;
+                    remain -= ts;
+                }
+            }
 
-		tornado();
+            int tr = this.r + dr[d];
+            int tc = this.c + dc[d];
 
-		bw.write(String.valueOf(answer));
+            if (visitable(tr, tc)) {
+                tiles[tr][tc].sand += remain;
+                sand = 0;
+            } else {
+                outSand += remain;
+                sand = 0;
+            }
+        }
+    }
 
-		bw.flush();
-		br.close();
-		bw.close();
-	}
+    public static void main(String[] args) throws IOException {
+        br = new BufferedReader(new InputStreamReader(System.in));
+        bw = new BufferedWriter(new OutputStreamWriter(System.out));
+        st = new StringTokenizer(br.readLine(), " ");
 
-	public static void tornado() {
-		int[] dr = { 0, 1, 0, -1 };
-		int[] dc = { -1, 0, 1, 0 };
+        N = Integer.parseInt(st.nextToken());
+        r = N / 2 + 1;
+        c = N / 2 + 1;
+        outSand = 0;
 
-		int y = N / 2;
-		int x = N / 2;
-		int cnt = 0;
-		int dir = 0;
-		int blocks = 1;
-		int limit = 1;
-		int n = 0;
+        int d = 0;
+        int limit = 1;
+        int dirCnt = 0;
+        int moved = 0;
 
-		while (blocks < N * N) {
-			if (map[y + dr[dir]][x + dc[dir]] > 0) {
-				spreadSand(y + dr[dir], x + dc[dir], dir);
-			}
-			// printVisited();
-			// printMap();
+        tiles = new Tile[N + 1][N + 1];
 
-			if (cnt == 2) {
-				cnt = 0;
-				limit += 1;
-			}
+        for (int y = 1; y <= N; y++) {
+            st = new StringTokenizer(br.readLine(), " ");
 
-			y += dr[dir];
-			x += dc[dir];
+            for (int x = 1; x <= N; x++) {
+                int sand = Integer.parseInt(st.nextToken());
+                tiles[y][x] = new Tile(y, x, sand);
+            }
+        }
 
-			blocks += 1;
-			n += 1;
+        // printMap();
 
-			if (n == limit) {
-				n = 0;
-				cnt += 1;
-				dir += 1;
+        while (r != 1 || c != 1) {
+            r = r + dr[d];
+            c = c + dc[d];
+            tiles[r][c].moveSand(d);
+            moved += 1;
+            // printMap();
 
-				if (dir == 4) {
-					dir = 0;
-				}
-			}
-		}
-	}
+            if (moved == limit) {
+                dirCnt += 1;
+                moved = 0;
 
-	public static int getTotalSand() {
-		int total = 0;
+                if (dirCnt == 2) {
+                    dirCnt = 0;
+                    limit += 1;
+                }
 
-		for (int r = 0; r < N; r++) {
-			for (int c = 0; c < N; c++) {
-				total += map[r][c];
-			}
-		}
+                d = (d + 1) % 4;
+                turnSandForm();
+            }
+        }
 
-		return total;
-	}
+        bw.write(String.valueOf(outSand));
+        bw.flush();
+        bw.close();
+        br.close();
+    }
 
-	public static void spreadSand(int y, int x, int dir) {
-		// α를 제외한 나머지 칸은 모두 9칸이다.
-		int[] dy = { 0, -1, -1, -1, -2, 1, 1, 1, 2, 0 };
-		int[] dx = { -2, -1, 0, 1, 0, -1, 0, 1, 0, -1 };
-		int[] per = { 5, 10, 7, 1, 2, 10, 7, 1, 2, 0 };
-		int total = 0;
+    public static boolean visitable(int tr, int tc) {
+        return (1 <= tr) && (tr <= N) && (1 <= tc) && (tc <= N);
+    }
 
-		for (int i = 0; i < 10; i++) {
-			int ty = 0;
-			int tx = 0;
+    public static void turnSandForm() {
+        for (int i = 0; i < 9; i++) {
+            int tmp = sr[i];
+            sr[i] = -sc[i];
+            sc[i] = tmp;
+        }
+    }
 
-			if (dir == 0) {
-				ty = y + dy[i];
-				tx = x + dx[i];
-			} else if (dir == 1) {
-				ty = y - dx[i];
-				tx = x + dy[i];
-			} else if (dir == 2) {
-				ty = y - dy[i];
-				tx = x - dx[i];
-			} else if (dir == 3) {
-				ty = y + dx[i];
-				tx = x - dy[i];
-			}
+    public static void printMap() {
+        System.out.println();
 
-			int sand = map[y][x] * per[i] / 100;
-			total += sand;
+        for (int y = 1; y <= N; y++) {
+            for (int x = 1; x <= N; x++) {
+                if (y == r && x == c) {
+                    System.out.printf("■ ");
+                } else {
+                    System.out.printf("□ ");
+                }
+            }
 
-			if (visitable(ty, tx)) {
-				if (i < 9) {
-					map[ty][tx] += sand;
-				} else {
-					map[ty][tx] += map[y][x] - total;
-				}
-			} else {
-				if (i < 9) {
-					answer += sand;
-				} else {
-					answer += map[y][x] - total;
-				}
-			}
-		}
+            System.out.printf("\t\t\t");
 
-		map[y][x] = 0;
-	}
+            for (int x = 1; x <= N; x++) {
+                System.out.printf("%5d ", tiles[y][x].sand);
+            }
 
-	public static boolean visitable(int y, int x) {
-		return (0 <= y) && (y < N) && (0 <= x) && (x < N);
-	}
-
-	public static void printMap() {
-		for (int r = 0; r < N; r++) {
-			for (int c = 0; c < N; c++) {
-				System.out.printf("%d ", map[r][c]);
-			}
-			System.out.println();
-		}
-		System.out.println("\n");
-	}
+            System.out.println();
+        }
+        System.out.println();
+    }
 }
