@@ -1,235 +1,213 @@
-import java.awt.Point;
 import java.io.*;
-import java.util.*;
+import java.util.StringTokenizer;
 
 public class Main {
-	public static BufferedReader br;
-	public static BufferedWriter bw;
-	public static int[][] map;
-	public static int N, Q;
-	public static int mLen;
-	public static int[] dirY = { -1, 1, 0, 0 };
-	public static int[] dirX = { 0, 0, -1, 1 };
-	public static boolean[][] visited;
+    public static BufferedReader br;
+    public static BufferedWriter bw;
+    public static StringTokenizer st;
+    public static final int[] dr = {-1, 1, 0, 0};
+    public static final int[] dc = {0, 0, -1, 1};
+    public static int N, Q, iceSize;
+    public static int[][] map, melt;
+    public static final boolean printYn = false;
 
-	public static void main(String[] args) throws IOException {
-		br = new BufferedReader(new InputStreamReader(System.in));
-		bw = new BufferedWriter(new OutputStreamWriter(System.out));
+    public static void main(String[] args) throws IOException {
+        br = new BufferedReader(new InputStreamReader(System.in));
+        bw = new BufferedWriter(new OutputStreamWriter(System.out));
+        st = new StringTokenizer(br.readLine(), " ");
 
-		StringTokenizer st = new StringTokenizer(br.readLine(), " ");
+        N = Integer.parseInt(st.nextToken());
+        N = (int) Math.pow(2, N);
 
-		N = Integer.parseInt(st.nextToken());
-		Q = Integer.parseInt(st.nextToken());
+        Q = Integer.parseInt(st.nextToken());
+        map = new int[N + 1][N + 1];
+        melt = new int[N + 1][N + 1];
 
-		mLen = (int) (Math.pow(2, N));
-		map = new int[mLen][mLen];
-		visited = new boolean[mLen][mLen];
+        for (int r = 1; r <= N; r++) {
+            st = new StringTokenizer(br.readLine(), " ");
 
-		for (int r = 0; r < mLen; r++) {
-			st = new StringTokenizer(br.readLine(), " ");
+            for (int c = 1; c <= N; c++) {
+                map[r][c] = Integer.parseInt(st.nextToken());
+            }
+        }
 
-			for (int c = 0; c < mLen; c++) {
-				map[r][c] = Integer.parseInt(st.nextToken());
-				visited[r][c] = false;
-			}
-		}
+        if (printYn) {
+            printMap();
+        }
 
-		st = new StringTokenizer(br.readLine(), " ");
+        st = new StringTokenizer(br.readLine(), " ");
 
-		for (int i = 0; i < Q; i++) {
-			int L = Integer.parseInt(st.nextToken());
+        for (int q = 0; q < Q; q++) {
+            int L = Integer.parseInt(st.nextToken());
+            storm(L);
+            checkIce();
+            meltIce();
+        }
 
-			// 작은 사각형 한 변의 크기
-			int sqSize = (int) (Math.pow(2, L));
+        bw.write(String.valueOf(getTotalIce()));
+        bw.newLine();
+        bw.write(String.valueOf(getMaxIce()));
 
-			// 작은 사각형 개수
-			int sq = (mLen * mLen) / (sqSize * sqSize);
+        bw.flush();
+        bw.close();
+        br.close();
+    }
 
-			int sqLen = (int) (Math.sqrt(sq));
+    public static void storm(int l) {
+        int L = (int) Math.pow(2, l);
+        int M = N / L;
 
-			for (int j = 0; j < sq; j++) {
-				int sy, sx, dy, dx;
+        for (int y = 0; y < M; y++) {
+            for (int x = 0; x < M; x++) {
+                int r = L * y + 1;
+                int c = L * x + 1;
+                rotate(r, c, L);
+            }
+        }
 
-				sy = j / sqLen * sqSize;
-				sx = j % sqLen * sqSize;
-				dy = sy + (sqSize - 1);
-				dx = sx + (sqSize - 1);
+        if (printYn) {
+            System.out.println("파이어스톰 시전");
+            printMap();
+        }
+    }
 
-				rotate(sy, sx, dy, dx, sqSize);
-			}
+    public static void rotate(int r, int c, int L) {
+        if (L <= 0) {
+            return;
+        }
 
-			// System.out.println("map을 회전합니다.");
-			// printMap();
+        int sr = r;
+        int sc = c;
+        int dr = r + L - 1;
+        int dc = c + L - 1;
+        int[] tmp = new int[L - 1];
 
-			// System.out.println("얼음이 녹습니다.");
-			melt();
-			// printMap();
-		}
+        // UP → tmp
+        for (int i = 0; i < L - 1; i++) {
+            tmp[i] = map[sr][sc + i];
+        }
 
-		int answer = 0;
+        // LEFT → UP
+        for (int i = sc; i < dc; i++) {
+            int m = i - sc;
+            map[sr][i] = map[dr - m][sc];
+        }
 
-		for (int r = 0; r < mLen; r++) {
-			for (int c = 0; c < mLen; c++) {
-				if (!visited[r][c] && map[r][c] > 0) {
-					answer = Math.max(answer, getIceSize(r, c));
-				}
-			}
-		}
+        // DOWN → LEFT
+        for (int i = dr; i > sr; i--) {
+            int m = dr - i;
+            map[i][sc] = map[dr][dc - m];
+        }
 
-		bw.write(String.valueOf(getTotalIce()));
-		bw.newLine();
-		bw.write(String.valueOf(answer));
+        // RIGHT → DOWN
+        for (int i = dc; i > sc; i--) {
+            int m = dc - i;
+            map[dr][i] = map[sr + m][dc];
+        }
 
-		bw.flush();
-		br.close();
-		bw.close();
-	}
+        // tmp(UP) → RIGHT
+        for (int i = sr; i < dr; i++) {
+            int m = i - sr;
+            map[i][dc] = tmp[m];
+        }
 
-	public static void rotate(int sy, int sx, int dy, int dx, int L) {
-		for (int i = 0; i < L / 2; i++) {
-			int ly, lx, ry, rx, l;
-			int[] arr;
+        rotate(r + 1, c + 1, L - 2);
+    }
 
-			l = L - i * 2;
-			arr = new int[l - 1];
+    public static void checkIce() {
+        for (int r = 1; r <= N; r++) {
+            for (int c = 1; c <= N; c++) {
+                int ice = 0;
 
-			ly = sy + i;
-			lx = sx + i;
-			ry = ly + (l - 1);
-			rx = lx + (l - 1);
+                for (int i = 0; i < 4; i++) {
+                    int tr = r + dr[i];
+                    int tc = c + dc[i];
 
-			int idx = 0;
+                    if (visitable(tr, tc)) {
+                        if (map[tr][tc] > 0) {
+                            ice += 1;
+                        }
+                    }
+                }
 
-			for (int y = ly; y < ry; y++) {
-				arr[idx] = map[y][lx];
-				idx += 1;
-			}
+                if (ice < 3 && map[r][c] > 0) {
+                    melt[r][c] -= 1;
+                }
+            }
+        }
+    }
 
-			idx = lx;
+    public static void meltIce() {
+        for (int r = 1; r <= N; r++) {
+            for (int c = 1; c <= N; c++) {
+                map[r][c] += melt[r][c];
+                melt[r][c] = 0;
+            }
+        }
 
-			for (int y = ly; y < ry; y++) {
-				map[y][lx] = map[ry][idx];
-				idx += 1;
-			}
+        if (printYn) {
+            System.out.println("얼음 녹음");
+            printMap();
+        }
+    }
 
-			idx = ry;
+    public static int getTotalIce() {
+        int sum = 0;
 
-			for (int x = lx; x < rx; x++) {
-				map[ry][x] = map[idx][rx];
-				idx -= 1;
-			}
+        for (int r = 1; r <= N; r++) {
+            for (int c = 1; c <= N; c++) {
+                sum += map[r][c];
+            }
+        }
 
-			idx = rx;
+        return sum;
+    }
 
-			for (int y = ry; y > ly; y--) {
-				map[y][rx] = map[ly][idx];
-				idx -= 1;
-			}
+    public static int getMaxIce() {
+        boolean[][] visited = new boolean[N + 1][N + 1];
+        int maxVal = 0;
 
-			idx = 0;
+        for (int r = 1; r <= N; r++) {
+            for (int c = 1; c <= N; c++) {
+                if (!visited[r][c] && map[r][c] > 0) {
+                    iceSize = 0;
+                    DFS(r, c, visited);
+                }
 
-			for (int x = rx; x > lx; x--) {
-				map[ly][x] = arr[idx];
-				idx += 1;
-			}
-		}
-	}
+                maxVal = Math.max(maxVal, iceSize);
+            }
+        }
 
-	public static int checkIce(int y, int x) {
-		int cnt = 0;
+        return maxVal;
+    }
 
-		for (int i = 0; i < 4; i++) {
-			int ty = y + dirY[i];
-			int tx = x + dirX[i];
+    public static void DFS(int r, int c, boolean[][] visited) {
+        visited[r][c] = true;
+        iceSize += 1;
 
-			if (visitable(ty, tx)) {
-				cnt += 1;
-			}
-		}
+        for (int i = 0; i < 4; i++) {
+            int tr = r + dr[i];
+            int tc = c + dc[i];
 
-		return cnt;
-	}
+            if (visitable(tr, tc) && !visited[tr][tc] && map[tr][tc] > 0) {
+                DFS(tr, tc, visited);
+            }
+        }
+    }
 
-	public static boolean visitable(int y, int x) {
-		return (0 <= y) && (y < mLen) && (0 <= x) && (x < mLen) && (map[y][x] > 0);
-	}
+    public static boolean visitable(int tr, int tc) {
+        return (1 <= tr) && (tr <= N) && (1 <= tc) && (tc <= N);
+    }
 
-	public static void melt() {
-		ArrayList<Point> list = new ArrayList<Point>();
+    public static void printMap() {
+        System.out.println();
 
-		for (int r = 0; r < mLen; r++) {
-			for (int c = 0; c < mLen; c++) {
-				if (map[r][c] > 0 && checkIce(r, c) < 3) {
-					Point p = new Point(c, r);
-					list.add(p);
-				}
-			}
-		}
-
-		for (Point p : list) {
-			map[p.y][p.x] -= 1;
-		}
-	}
-
-	public static int getTotalIce() {
-		int total = 0;
-
-		for (int r = 0; r < mLen; r++) {
-			for (int c = 0; c < mLen; c++) {
-				total += map[r][c];
-			}
-		}
-
-		return total;
-	}
-
-	public static int getIceSize(int y, int x) {
-		int size = 0;
-
-		Queue<Point> queue = new LinkedList<Point>();
-		queue.add(new Point(x, y));
-
-		visited[y][x] = true;
-
-		while (!queue.isEmpty()) {
-			Point p = queue.poll();
-			size += 1;
-
-			for (int i = 0; i < 4; i++) {
-				int ty = p.y + dirY[i];
-				int tx = p.x + dirX[i];
-
-				if (visitable(ty, tx) && !visited[ty][tx]) {
-					visited[ty][tx] = true;
-					queue.add(new Point(tx, ty));
-				}
-			}
-		}
-
-		return size;
-	}
-
-	public static void printMap() {
-		for (int r = 0; r < mLen; r++) {
-			for (int c = 0; c < mLen; c++) {
-				if (map[r][c] > 0) {
-					System.out.printf("%d ", map[r][c]);
-				} else {
-					System.out.printf("  ");
-				}
-			}
-			System.out.println();
-		}
-		System.out.println();
-	}
-
-	public static void printSquare(int sy, int sx, int dy, int dx) {
-		for (int y = sy; y <= dy; y++) {
-			for (int x = sx; x <= dx; x++) {
-				System.out.printf("%d ", map[y][x]);
-			}
-			System.out.println();
-		}
-		System.out.println();
-	}
+        for (int r = 1; r <= N; r++) {
+            for (int c = 1; c <= N; c++) {
+                System.out.printf("%4d", map[r][c]);
+            }
+            System.out.println();
+        }
+        System.out.println();
+    }
 }
